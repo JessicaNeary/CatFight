@@ -11,6 +11,7 @@ const speed = 2
 let player
 let hitGround //checks whether player is touching the ground
 let cursors //stores keyboard input
+let spacebar
 
 const game = new Phaser.Game(WIDTH, HEIGHT, Phaser.AUTO, 'game', { preload: preload, create: create, update: update });
 
@@ -27,6 +28,7 @@ function preload() {
 function create() {
   game.physics.startSystem(Phaser.Physics.ARCADE);
   cursors = game.input.keyboard.createCursorKeys();
+  spacebar = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR)
 
   //add player
   player = game.add.sprite(WIDTH*0.5, HEIGHT*0.5, 'hero')
@@ -69,43 +71,49 @@ function move() {
   //  Reset the players velocity (movement)
     player.body.velocity.x = 0;
 
-    if (cursors.left.isDown) {
-      player.scale.x = -3
-      if(cursors.up.isDown) {
-        player.animations.play('punch') //punch left
-      }
-      else if(cursors.down.isDown) {
-        player.animations.play('kick') //kick left
-      }
-      else{
-      //  Move to the left
-        player.body.velocity.x = -150
-        player.animations.play('walk')
-      }
-    }
-
-    else if (cursors.right.isDown) {
+    if (cursors.right.isDown) {
       player.scale.x = 3
-      if(cursors.up.isDown) {
-        player.animations.play('punch') //punch right
-      }
-      else if(cursors.down.isDown) {
-        player.animations.play('kick') //kick right
-      }
-      else {
-      //  Move to the right
+
+      if(spacebar.isDown) {
         player.body.velocity.x = 150
-        player.animations.play('walk')
+        player.animations.play('walk') //walk right
+      }
+
+      else {
+        if(cursors.down.isDown) {
+          player.animations.play('kick')//right low kick
+        }
+        else{
+          player.animations.play('punch')//right jab
+        }
       }
     }
 
-    //  Allow the player to jump if they are touching the ground.
+
+    else if(cursors.left.isDown) {
+      player.scale.x = -3
+
+      if(spacebar.isDown) {
+        player.body.velocity.x = -150
+        player.animations.play('walk') //walk left
+      }
+
+      else {
+        //left uppercut
+        if(cursors.down.isDown) {
+          player.animations.play('kick') //left kick
+        }
+        else {
+          player.animations.play('punch') //left jab
+        }
+      }
+    }
+
     else if (cursors.up.isDown && player.body.touching.down && hitGround) {
       //  player.animations.play('jump')
        player.body.velocity.y = -350
     }
     else {
-        //  Stand still
-        player.animations.play('idle')
+      player.animations.play('idle')
     }
 }
