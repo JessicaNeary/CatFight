@@ -6,9 +6,9 @@ const bg0 = 'assets/0_foreground.png'
 
 const WIDTH = 800
 const HEIGHT = 600
-const speed = 2
 
 let player
+let enemies
 let hitGround //checks whether player is touching the ground
 let cursors //stores keyboard input
 let spacebar
@@ -30,25 +30,9 @@ function create() {
   cursors = game.input.keyboard.createCursorKeys();
   spacebar = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR)
 
-  //add player
-  player = game.add.sprite(WIDTH*0.5, HEIGHT*0.5, 'hero')
-  player.frame = 0
+  loadPlayer()
 
-  player.scale.setTo(3, 3)
-  game.physics.arcade.enable(player)
-  player.anchor.set(0.5)
-  player.body.setSize(41, 53) //adjusts bounds
-  player.body.bounce.y = 0.2
-  player.body.gravity.y = 1000
-  // player.body.collideWorldBounds = true;
-
-  //sets player animations
-  player.animations.add('idle', [0, 1, 2, 3], 5, true)
-  player.animations.add('walk', [16, 17, 18, 19, 20, 21, 22, 23], 10, true)
-  // player.animations.add('punch', [98, 99, 100, 101], 10, false)
-  player.animations.add('punch', [151, 152, 146, 150], 10, false)
-  player.animations.add('kick', [162, 163, 164, 165], 10, false)
-  // player.animations.add('jump', [32, 33, 34, 35, 36, 37, 38, 39], 5, false)
+  loadEnemies()
 
   //add background
 
@@ -116,4 +100,30 @@ function move() {
     else {
       player.animations.play('idle')
     }
+}
+
+function loadPlayer() {
+  //add player
+  player = game.add.sprite(WIDTH*0.5, HEIGHT*0.5, 'hero')
+  player.frame = 0
+
+  player.scale.setTo(3, 3)
+  game.physics.arcade.enable(player)
+  player.anchor.set(0.5)
+  player.body.setSize(41, 53) //adjusts bounds
+  player.body.bounce.y = 0.2
+  player.body.gravity.y = 1000
+  // player.body.collideWorldBounds = true;
+
+  //sets player animations
+  player.animations.add('idle', [0, 1, 2, 3], 5, true)
+  player.animations.add('walk', [16, 17, 18, 19, 20, 21, 22, 23], 10, true)
+  // player.animations.add('punch', [98, 99, 100, 101], 10, false)
+  player.animations.add('punch', [151, 152, 146, 150], 10, false)
+  player.animations.add('kick', [162, 163, 164, 165], 10, false)
+  // player.animations.add('jump', [32, 33, 34, 35, 36, 37, 38, 39], 5, false)
+}
+
+function loadEnemies() {
+  enemies = game.add.group()
 }
