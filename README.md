@@ -1,3 +1,3 @@
 # Cat Fight
 
-One cats stand against the ninja kitty hoard
+One cat's stand against the ninja kitty hoard
