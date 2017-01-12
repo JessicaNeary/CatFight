@@ -1,0 +1,19 @@
+{
+  "name": "CatFight",
+  "version": "0.1.0",
+  "description": "One cat's last stand against the ninja hoard",
+  "main": "index.js",
+  "scripts": {
+    "start": "budo index.js --live --css style.css"
+  },
+  "keywords": [],
+  "author": "Jessica Neary",
+  "license": "ISC",
+  "devDependencies": {
+    "budo": "^9.2.2"
+  },
+  "dependencies": {
+    "phaser": "^2.6.2",
+    "pixi": "^0.3.1"
+  }
+}
