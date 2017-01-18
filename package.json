@@ -13,6 +13,7 @@
     "budo": "^9.2.2"
   },
   "dependencies": {
+    "budo": "^9.4.5",
     "phaser": "^2.6.2",
     "pixi": "^0.3.1"
   }

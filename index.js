@@ -2,24 +2,28 @@ window.PIXI = require('phaser/build/custom/pixi')
 window.p2 = require('phaser/build/custom/p2')
 window.Phaser = require('phaser/build/custom/phaser-split')
 
-const bg0 = 'assets/0_foreground.png'
-
 const WIDTH = 800
 const HEIGHT = 600
 
 let player
 let enemies
+let ground
 let hitGround //checks whether player is touching the ground
 let cursors //stores keyboard input
 let spacebar
 
+let bg0
+let bg1
+let bg2
+let bg3
+
 const game = new Phaser.Game(WIDTH, HEIGHT, Phaser.AUTO, 'game', { preload: preload, create: create, update: update });
 
 function preload() {
-  // game.add.tileSprite(0, 0, WIDTH, HEIGHT, 'assets/3_bg.png')
-  // game.add.tileSprite(0, 0, WIDTH, HEIGHT, 'assets/2_far-buildings.png')
-  // game.add.tileSprite(0, 0, WIDTH, HEIGHT, 'assets/1_buildings.png')
-  // game.add.tileSprite(0, 0, WIDTH, HEIGHT, bg0)
+  game.load.image('bg3', 'assets/3_bg.png')
+  game.load.image('bg2', 'assets/2_far-buildings.png')
+  game.load.image('bg1', 'assets/1_buildings.png')
+  game.load.image('bg0', 'assets/0_foreground.png')
   game.load.image('ground', 'assets/ground.jpg')
   game.load.spritesheet('hero', 'assets/cat_fighter.png', 64, 64)
 
@@ -31,27 +35,32 @@ function create() {
   spacebar = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR)
 
   loadPlayer()
+	game.camera.focusOnXY(player.x, player.y) //locks camera onto player
 
   loadEnemies()
 
   //add background
-
+	bg3 = game.add.tileSprite(0, 0, 160, 127, 'bg3')
+	bg2 = game.add.tileSprite(0, 0, 160, 127, 'bg2')
+	bg1 = game.add.tileSprite(0, 0, 160, 127, 'bg1')
+	bg0 = game.add.tileSprite(0, 0, 160, 127, 'bg0')
 
   //add ground
-  platform = game.add.group()
-  platform.enableBody = true; //enables physics
-  var ground = platform.create(0, HEIGHT - 150, 'ground')
-  ground.scale.setTo(0.4, 0.4) //scales to fit game width
-  ground.body.immovable = true;
+  // platform = game.add.group()
+  ground = game.add.tileSprite(0, HEIGHT - 150, WIDTH, 150, 'ground')
+	ground.enableBody = true; //enables physics
+  // ground.scale.setTo(0.4, 0.4) //scales to fit game width
+  // ground.body.immovable = true;
 
 }
 
 function update() {
-  hitGround = game.physics.arcade.collide(player, platform)
-  move()
+  hitGround = game.physics.arcade.collide(player, ground)
+  movePlayer()
+	moveBg()
 }
 
-function move() {
+function movePlayer() {
   //  Reset the players velocity (movement)
     player.body.velocity.x = 0;
 
@@ -59,7 +68,7 @@ function move() {
       player.scale.x = 3
 
       if(spacebar.isDown) {
-        player.body.velocity.x = 150
+        player.body.velocity.x = 100
         player.animations.play('walk') //walk right
       }
 
@@ -78,7 +87,7 @@ function move() {
       player.scale.x = -3
 
       if(spacebar.isDown) {
-        player.body.velocity.x = -150
+        player.body.velocity.x = -15
         player.animations.play('walk') //walk left
       }
 
@@ -100,6 +109,13 @@ function move() {
     else {
       player.animations.play('idle')
     }
+}
+
+function moveBg() {
+	ground.tilePosition.x -= 0.5
+	bg0.tilePosition.x -= 0.5
+	bg1.tilePosition.x -= 0.3
+	bg2.tilePosition.x -= 0.1
 }
 
 function loadPlayer() {
