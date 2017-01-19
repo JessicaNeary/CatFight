@@ -11,22 +11,18 @@ let ground
 let hitGround //checks whether player is touching the ground
 let cursors //stores keyboard input
 let spacebar
-
-let bg0
-let bg1
-let bg2
-let bg3
+let background
 
 const game = new Phaser.Game(WIDTH, HEIGHT, Phaser.AUTO, 'game', { preload: preload, create: create, update: update });
 
 function preload() {
-  game.load.image('bg3', 'assets/3_bg.png')
-  game.load.image('bg2', 'assets/2_far-buildings.png')
-  game.load.image('bg1', 'assets/1_buildings.png')
-  game.load.image('bg0', 'assets/0_foreground.png')
-  game.load.image('ground', 'assets/ground.jpg')
+  game.load.image('ground', 'assets/metal_thing_3.jpg', 1908, 484)
   game.load.spritesheet('hero', 'assets/cat_fighter.png', 64, 64)
-
+  game.load.image('bg0', 'assets/0_foreground.png', 272, 104)
+  game.load.image('bg1', 'assets/1_buildings.png', 272, 150)
+  game.load.image('bg2', 'assets/2_far-buildings.png', 213, 142)
+  game.load.image('bg3', 'assets/3_bg.png', 272, 160)
+  game.load.spritesheet('skeleton', 'assets/skeleton.png', 64, 64)
 }
 
 function create() {
@@ -34,37 +30,60 @@ function create() {
   cursors = game.input.keyboard.createCursorKeys();
   spacebar = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR)
 
-  loadPlayer()
-	game.camera.focusOnXY(player.x, player.y) //locks camera onto player
-
-  loadEnemies()
-
   //add background
-	bg3 = game.add.tileSprite(0, 0, 160, 127, 'bg3')
-	bg2 = game.add.tileSprite(0, 0, 160, 127, 'bg2')
-	bg1 = game.add.tileSprite(0, 0, 160, 127, 'bg1')
-	bg0 = game.add.tileSprite(0, 0, 160, 127, 'bg0')
+  const bg3 = game.add.tileSprite(0, 0, WIDTH, HEIGHT, 'bg3')
+  const bg2 = game.add.tileSprite(50, 0, WIDTH, HEIGHT, 'bg2')
+  const bg1 = game.add.tileSprite(0, 0, WIDTH, HEIGHT, 'bg1')
+  const bg0 = game.add.tileSprite(0, 50, WIDTH, HEIGHT, 'bg0')
+  background = game.add.group()
+  background.add(bg3)
+  background.add(bg2)
+  background.add(bg1)
+  background.add(bg0)
+  background.setAll('tileScale.x', 4)
+  background.setAll('tileScale.y', 4)
+
 
   //add ground
-  // platform = game.add.group()
-  ground = game.add.tileSprite(0, HEIGHT - 150, WIDTH, 150, 'ground')
-	ground.enableBody = true; //enables physics
-  // ground.scale.setTo(0.4, 0.4) //scales to fit game width
-  // ground.body.immovable = true;
+  ground = game.add.tileSprite(0, HEIGHT - 150, WIDTH*3, 450, 'ground')
+  ground.scale.setTo(0.4, 0.4) //scales to fit game width
+  ground.tint = 0x93ecbf
+  game.physics.arcade.enable(ground)
+  ground.body.immovable = true;
 
+  loadPlayer()
+
+  loadEnemies()
 }
+
+
 
 function update() {
   hitGround = game.physics.arcade.collide(player, ground)
-  movePlayer()
-	moveBg()
+  game.physics.arcade.collide(enemies, ground)
+  game.physics.arcade.collide(player, enemies, attack, null, this)
+  checkHit()
+  move()
+  enemies.setAll('body.x', 0.3, false, false, 1)
+}
+
+function  checkHit() {
+  enemies.forEach(function (enemy){
+    if(enemy.body.x > player.body.x - 120 && enemy.body.x < player.body.x + 120) {
+      if(player.attacking){
+        enemy.dead = true
+        enemy.animations.play('dead')
+      }
+    }
+  })
 }
 
 function movePlayer() {
   //  Reset the players velocity (movement)
     player.body.velocity.x = 0;
-
-    if (cursors.right.isDown) {
+    player.attacking = false
+    if(player.dead) {}
+    else if (cursors.right.isDown) {
       player.scale.x = 3
 
       if(spacebar.isDown) {
@@ -74,14 +93,15 @@ function movePlayer() {
 
       else {
         if(cursors.down.isDown) {
+          player.attacking = true
           player.animations.play('kick')//right low kick
         }
         else{
+          player.attacking = true
           player.animations.play('punch')//right jab
         }
       }
     }
-
 
     else if(cursors.left.isDown) {
       player.scale.x = -3
@@ -94,9 +114,11 @@ function movePlayer() {
       else {
         //left uppercut
         if(cursors.down.isDown) {
+          player.attacking = true
           player.animations.play('kick') //left kick
         }
         else {
+          player.attacking = true
           player.animations.play('punch') //left jab
         }
       }
@@ -111,24 +133,29 @@ function movePlayer() {
     }
 }
 
-function moveBg() {
-	ground.tilePosition.x -= 0.5
-	bg0.tilePosition.x -= 0.5
-	bg1.tilePosition.x -= 0.3
-	bg2.tilePosition.x -= 0.1
+
+function attack(player, enemy) {
+  if(!player.attacking && !enemy.dead) {
+    if(!player.dead) { //stops death looping
+      player.animations.play('dead')
+    }
+    player.dead = true
+    //gameover
+  }
 }
 
 function loadPlayer() {
   //add player
   player = game.add.sprite(WIDTH*0.5, HEIGHT*0.5, 'hero')
-  player.frame = 0
 
   player.scale.setTo(3, 3)
   game.physics.arcade.enable(player)
   player.anchor.set(0.5)
-  player.body.setSize(41, 53) //adjusts bounds
+  player.body.setSize(33, 53) //adjusts bounds
   player.body.bounce.y = 0.2
   player.body.gravity.y = 1000
+  player.dead = false
+  player.attacking = false
   // player.body.collideWorldBounds = true;
 
   //sets player animations
@@ -137,9 +164,66 @@ function loadPlayer() {
   // player.animations.add('punch', [98, 99, 100, 101], 10, false)
   player.animations.add('punch', [151, 152, 146, 150], 10, false)
   player.animations.add('kick', [162, 163, 164, 165], 10, false)
+  player.animations.add('dead', [64, 65, 66, 67, 68, 69, 70], 5, false)
   // player.animations.add('jump', [32, 33, 34, 35, 36, 37, 38, 39], 5, false)
 }
 
+
+
 function loadEnemies() {
   enemies = game.add.group()
+  // enemies.createnewEnemy()
+  sendWave(5, 3000)
+  // game.physics.arcade.enable(enemies)
+}
+
+function sendWave (size, delay) {
+  let count = 1
+  let id = setInterval(function() {
+    if(count === size) {clearInterval(id)}
+    let direction = Math.round(Math.random())
+    console.log(direction)
+    newEnemy(direction)
+    count++
+  }, delay)
+}
+
+function newEnemy (direction) {
+  const enemy = game.add.sprite(direction*1500, 150, 'skeleton')
+  enemy.frame = 0
+  enemy.dead = false
+  if(direction === 1)  {
+    enemy.scale.setTo(-2, 2)
+    enemy.right = true //stores where the enemy begins
+  }
+  else enemy.scale.setTo(2, 2)
+  enemy.anchor.set(0.5)
+  game.physics.arcade.enable(enemy)
+  enemy.body.gravity.y = 1000
+  enemy.body.setSize(50, 60) //adjusts bounds
+  enemy.animations.add('walk', [8, 9, 10, 11], 4, true)
+  enemy.animations.add('dead', [24, 25, 26, 27, 28, 29, 30], 5, false)
+  .killOnComplete = true
+  enemy.animations.play('walk')
+  enemies.add(enemy)
+}
+
+
+
+function scrollBackground (direction) {
+  // background.set(bg0, 'tilePosition.x', 50, 1)
+  let distance = 0.1
+  background.forEach(function (bg) {
+    if(direction === 'left') bg.tilePosition.x += distance
+    else bg.tilePosition.x -= distance
+    distance += 0.05
+  })
+  if(direction === 'left'){
+    ground.tilePosition.x += 5
+    enemies.setAll('body.x', 2, false, false, 1)
+  }
+  else{
+    ground.tilePosition.x -= 5
+    enemies.setAll('body.x', 2, false, false, 2)
+  }
 }
