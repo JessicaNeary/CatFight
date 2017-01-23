@@ -146,8 +146,8 @@ function attack(player, enemy) {
 
 function moveEnemies() {
   enemies.forEach(function (enemy) {
-    if(enemy.facingLeft) {enemy.body.x -= 0.3}
-    else {enemy.body.x += 0.3}
+    if(enemy.facingLeft) {enemy.body.x -= enemy.speed}
+    else {enemy.body.x += enemy.speed}
   })
 }
 
@@ -180,22 +180,22 @@ function loadPlayer() {
 function loadEnemies() {
   enemies = game.add.group()
   // enemies.createnewEnemy()
-  sendWave(5, 3000)
+  sendWave(5, 3)
   // game.physics.arcade.enable(enemies)
 }
 
-function sendWave (size, delay) {
+function sendWave (size, speed) {
   let count = 1
   let id = setInterval(function() {
     if(count === size) {clearInterval(id)}
     let direction = Math.round(Math.random())
     console.log(direction)
-    newEnemy(direction)
+    newEnemy(direction, speed)
     count++
-  }, delay)
+  }, 3000)
 }
 
-function newEnemy (direction) {
+function newEnemy (direction, speed) {
   let enemy = game.add.sprite(0, 150, 'skeleton')
     game.physics.arcade.enable(enemy)
   if(direction === 1)  {
@@ -210,6 +210,7 @@ function newEnemy (direction) {
     enemy.anchor.set(0.5)
     enemy.scale.setTo(2, 2)
   }
+  enemy.speed = speed/10
   enemy.frame = 0
   enemy.dead = false
   enemy.anchor.set(0.5)
