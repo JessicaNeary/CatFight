@@ -64,7 +64,7 @@ function update() {
   game.physics.arcade.collide(player, enemies, attack, null, this)
   checkHit()
   move()
-  enemies.setAll('body.x', 0.3, false, false, 1)
+  moveEnemies()
 }
 
 function  checkHit() {
@@ -78,7 +78,7 @@ function  checkHit() {
   })
 }
 
-function movePlayer() {
+function move() {
   //  Reset the players velocity (movement)
     player.body.velocity.x = 0;
     player.attacking = false
@@ -107,7 +107,7 @@ function movePlayer() {
       player.scale.x = -3
 
       if(spacebar.isDown) {
-        player.body.velocity.x = -15
+        player.body.velocity.x = -100
         player.animations.play('walk') //walk left
       }
 
@@ -142,6 +142,13 @@ function attack(player, enemy) {
     player.dead = true
     //gameover
   }
+}
+
+function moveEnemies() {
+  enemies.forEach(function (enemy) {
+    if(enemy.facingLeft) {enemy.body.x -= 0.3}
+    else {enemy.body.x += 0.3}
+  })
 }
 
 function loadPlayer() {
@@ -189,16 +196,24 @@ function sendWave (size, delay) {
 }
 
 function newEnemy (direction) {
-  const enemy = game.add.sprite(direction*1500, 150, 'skeleton')
+  let enemy = game.add.sprite(0, 150, 'skeleton')
+    game.physics.arcade.enable(enemy)
+  if(direction === 1)  {
+    // enemy = game.add.sprite(800, 150, 'skeleton')
+    // enemy.anchor.set(0.5, 1)
+    enemy.scale.setTo(-2, 2)
+    enemy.x = 800
+    enemy.facingLeft = true //stores where the enemy begins
+  }
+  else {
+    // enemy = game.add.sprite(0, 150, 'skeleton')
+    enemy.anchor.set(0.5)
+    enemy.scale.setTo(2, 2)
+  }
   enemy.frame = 0
   enemy.dead = false
-  if(direction === 1)  {
-    enemy.scale.setTo(-2, 2)
-    enemy.right = true //stores where the enemy begins
-  }
-  else enemy.scale.setTo(2, 2)
   enemy.anchor.set(0.5)
-  game.physics.arcade.enable(enemy)
+
   enemy.body.gravity.y = 1000
   enemy.body.setSize(50, 60) //adjusts bounds
   enemy.animations.add('walk', [8, 9, 10, 11], 4, true)
