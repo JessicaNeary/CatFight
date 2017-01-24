@@ -19,6 +19,7 @@ let background
 let paused = false
 let currentEnemies //stores number of enemies current alive
 let stateText
+let gaveOverText
 let wave = 1
 
 
@@ -60,12 +61,21 @@ function create() {
   game.physics.arcade.enable(ground)
   ground.body.immovable = true;
 
+
   loadPlayer()
+  // game.debug.body(player, 'pink')
 
   loadEnemies()
+  // enemies.forEach(function (enemy){
+  //
+  // })
+
+
 
   scoreText = game.add.text(10, 10, 'wave: '+wave, { font: '32px Arial', fill: '#fff' })
   stateText = game.add.text(game.world.centerX - 100, game.world.centerY - 200,' ', { font: '48px Arial', fill: '#fff' })
+  gameOverText = game.add.text(game.world.centerX - 100, game.world.centerY - 200,'GAME OVER \n Click to restart', { font: '48px Arial', fill: '#fff' })
+  gameOverText.visible = false
   stateText.text="WAVE COMPLETE \n Start next wave?"
   stateText.visible = false
 }
@@ -84,8 +94,7 @@ function pauseState() {
 }
 
 function gameOver() {
-  stateText.text = "GAME OVER"
-  stateText.visible = true
+  gameOverText.visible = true
   // wave = 1
   // game.input.onTap.addOnce(function() {
   //   enemies.removeAll()
@@ -109,7 +118,7 @@ function update() {
 
 function  checkHit() {
   enemies.forEach(function (enemy){
-    if(enemy.body.x > player.body.x - 120 && enemy.body.x < player.body.x + 120) {
+    if(enemy.body.x > player.body.x - 120 && enemy.body.x < player.body.x + 50) {
       if(player.attacking && enemy.alive){
         enemy.alive = false
         enemy.animations.play('dead')
@@ -179,6 +188,7 @@ function move() {
 function attack(player, enemy) {
   if(!player.attacking && enemy.alive) {
     if(!player.dead) { //stops death looping
+      enemy.animations.play('attack')
       player.animations.play('dead')
     }
     player.dead = true
@@ -199,8 +209,8 @@ function loadPlayer() {
 
   player.scale.setTo(3, 3)
   game.physics.arcade.enable(player)
-  player.anchor.set(0.5)
-  player.body.setSize(33, 53) //adjusts bounds
+  player.anchor.set(0.5, 0.5)
+  player.body.setSize(8 , 53, 25, 0) //adjusts bounds
   player.body.bounce.y = 0.2
   player.body.gravity.y = 1000
   player.alive = true
@@ -240,31 +250,33 @@ function sendWave (size, delay) {
 
 function newEnemy (direction) {
   let enemy = game.add.sprite(0, HEIGHT-206, 'skeleton')
-    game.physics.arcade.enable(enemy)
+  game.physics.arcade.enable(enemy)
   if(direction === 1)  {
-    // enemy = game.add.sprite(800, 150, 'skeleton')
-    // enemy.anchor.set(0.5, 1)
-    enemy.scale.setTo(-2, 2)
-    enemy.x = 800
-    enemy.facingLeft = true //stores where the enemy begins
-  }
-  else {
-    // enemy = game.add.sprite(0, 150, 'skeleton')
-    enemy.anchor.set(0.5)
-    enemy.scale.setTo(2, 2)
-  }
+    //  enemy = game.add.sprite(800, 150, 'skeleton')
+     enemy.scale.setTo(-2, 2)
+     enemy.x = 800
+     enemy.facingLeft = true //stores where the enemy begins
+   }
+   else {
+    //  enemy = game.add.sprite(0, 150, 'skeleton')
+     enemy.scale.setTo(2, 2)
+   }
   enemy.frame = 0
   enemy.dead = false
   enemy.anchor.set(0.5)
 
-  enemy.body.setSize(50, 60) //adjusts bounds
+  enemy.body.setSize(50, 80) //adjusts bounds
   enemy.animations.add('walk', [8, 9, 10, 11], 3+(wave), true)
+  enemy.animations.add('attack', [17, 18, 19, 16], 5, false)
   enemy.animations.add('dead', [24, 25, 26, 27, 28, 29, 30], 5, false)
   .killOnComplete = true
   enemy.animations.play('walk')
+  //makes enemy resume walking when attack is complete
+  enemy.events.onAnimationComplete = new Phaser.Signal()
+  enemy.events.onAnimationComplete.add(function() {enemy.animations.play('walk')})
+  // game.debug.body(enemy, 'red')
   enemies.add(enemy)
 }
-
 
 
 function scrollBackground (direction) {
