@@ -118,21 +118,31 @@ function update() {
 
 function  checkHit() {
   enemies.forEach(function (enemy){
-    if(enemy.body.x > player.body.x - 120 && enemy.body.x < player.body.x + 50) {
-      if(player.attacking && enemy.alive){
-        enemy.alive = false
-        enemy.animations.play('dead')
-        currentEnemies--
-        console.log(currentEnemies)
+    if(enemy.body.x > player.body.x - 120 && enemy.body.x < player.body.x + 50) { //checks within players hit radius
+      if(player.attackingLeft && enemy.body.x < player.body.x){ //checks facing enemy
+        attackEnemy(enemy)
+      }
+      else if(player.attackingRight && enemy.body.x > player.body.x) { //checks facing enemy
+        attackEnemy(enemy)
       }
     }
   })
 }
 
+function attackEnemy(enemy) {
+  if(enemy.alive){
+    enemy.alive = false
+    enemy.animations.play('dead')
+    currentEnemies--
+    console.log(currentEnemies)
+  }
+}
+
 function move() {
   //  Reset the players velocity (movement)
     player.body.velocity.x = 0;
-    player.attacking = false
+    player.attackingRight = false
+    player.attackingLeft = false
     if(player.dead) {}
     else if (cursors.right.isDown) {
       player.scale.x = 3
@@ -144,11 +154,11 @@ function move() {
 
       else {
         if(cursors.down.isDown) {
-          player.attacking = true
+          player.attackingRight = true
           player.animations.play('kick')//right low kick
         }
         else{
-          player.attacking = true
+          player.attackingRight = true
           player.animations.play('punch')//right jab
         }
       }
@@ -165,11 +175,11 @@ function move() {
       else {
         //left uppercut
         if(cursors.down.isDown) {
-          player.attacking = true
+          player.attackingLeft = true
           player.animations.play('kick') //left kick
         }
         else {
-          player.attacking = true
+          player.attackingLeft = true
           player.animations.play('punch') //left jab
         }
       }
