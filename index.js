@@ -33,9 +33,11 @@ function preload() {
   game.load.image('bg2', 'assets/2_far-buildings.png', 213, 142)
   game.load.image('bg3', 'assets/3_bg.png', 272, 160)
   game.load.spritesheet('skeleton', 'assets/skeleton.png', 64, 64)
+  game.load.script('boot')
 }
 
 function create() {
+  game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL
   game.physics.startSystem(Phaser.Physics.ARCADE);
   cursors = game.input.keyboard.createCursorKeys();
   spacebar = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR)
@@ -61,7 +63,8 @@ function create() {
   game.physics.arcade.enable(ground)
   ground.body.immovable = true;
 
-
+  game.state.add('boot', 'boot')
+  game.state.start('boot')
   loadPlayer()
   // game.debug.body(player, 'pink')
 
@@ -118,31 +121,21 @@ function update() {
 
 function  checkHit() {
   enemies.forEach(function (enemy){
-    if(enemy.body.x > player.body.x - 120 && enemy.body.x < player.body.x + 50) { //checks within players hit radius
-      if(player.attackingLeft && enemy.body.x < player.body.x){ //checks facing enemy
-        attackEnemy(enemy)
-      }
-      else if(player.attackingRight && enemy.body.x > player.body.x) { //checks facing enemy
-        attackEnemy(enemy)
+    if(enemy.body.x > player.body.x - 120 && enemy.body.x < player.body.x + 50) {
+      if(player.attacking && enemy.alive){
+        enemy.alive = false
+        enemy.animations.play('dead')
+        currentEnemies--
+        console.log(currentEnemies)
       }
     }
   })
 }
 
-function attackEnemy(enemy) {
-  if(enemy.alive){
-    enemy.alive = false
-    enemy.animations.play('dead')
-    currentEnemies--
-    console.log(currentEnemies)
-  }
-}
-
 function move() {
   //  Reset the players velocity (movement)
     player.body.velocity.x = 0;
-    player.attackingRight = false
-    player.attackingLeft = false
+    player.attacking = false
     if(player.dead) {}
     else if (cursors.right.isDown) {
       player.scale.x = 3
@@ -154,11 +147,11 @@ function move() {
 
       else {
         if(cursors.down.isDown) {
-          player.attackingRight = true
+          player.attacking = true
           player.animations.play('kick')//right low kick
         }
         else{
-          player.attackingRight = true
+          player.attacking = true
           player.animations.play('punch')//right jab
         }
       }
@@ -175,11 +168,11 @@ function move() {
       else {
         //left uppercut
         if(cursors.down.isDown) {
-          player.attackingLeft = true
+          player.attacking = true
           player.animations.play('kick') //left kick
         }
         else {
-          player.attackingLeft = true
+          player.attacking = true
           player.animations.play('punch') //left jab
         }
       }
