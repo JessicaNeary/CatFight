@@ -9,3 +9,15 @@ After cloning this repo:
 ```sh
 npm install
 ```
+
+Ensure all packages are up to date with
+
+```sh
+npm update
+```
+
+To run the application
+
+```sh
+npm start
+```
